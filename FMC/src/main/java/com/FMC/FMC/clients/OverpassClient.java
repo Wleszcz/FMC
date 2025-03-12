@@ -39,13 +39,11 @@ public class OverpassClient {
                     if (elements == null || elements.isEmpty()) {
                         return Mono.empty();
                     }
-                    // Sortowanie wyników według odległości od (lat, lon)
                     elements.sort(Comparator.comparingDouble(e -> {
                         double eLat = ((Number) e.get("lat")).doubleValue();
                         double eLon = ((Number) e.get("lon")).doubleValue();
                         return jtsDistance(lat, lon, eLat, eLon);
                     }));
-                    // Zwracamy najbliższy obiekt (pierwszy po sortowaniu)
                     return Mono.just(elements.get(0));
                 });
     }

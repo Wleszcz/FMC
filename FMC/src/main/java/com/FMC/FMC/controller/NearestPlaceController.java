@@ -48,14 +48,11 @@ public class NearestPlaceController {
     private Map<String, Object> extractTravelSummary(Map<String, Object> travelData) {
         Map<String, Object> travelSummary = new HashMap<>();
         if (travelData != null) {
-            // Pobieramy listę "features"
             List<Map<String, Object>> features = (List<Map<String, Object>>) travelData.get("features");
             if (features != null && !features.isEmpty()) {
-                // Używamy pierwszego elementu
                 Map<String, Object> firstFeature = features.get(0);
                 Map<String, Object> properties = (Map<String, Object>) firstFeature.get("properties");
                 if (properties != null) {
-                    // Pobieramy listę segmentów
                     List<Map<String, Object>> segments = (List<Map<String, Object>>) properties.get("segments");
                     if (segments != null && !segments.isEmpty()) {
                         // Pierwszy segment zawiera interesujące nas dane
