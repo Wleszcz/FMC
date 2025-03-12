@@ -1,0 +1,12 @@
+### GET request to example server
+GET http://localhost:8080/api/nearest-place?lat=54.379194&lon=18.607936&type=atm
+###
+
+### GET request to example server
+GET http://localhost:8080/api/nearest-place?lat=54.379194&lon=18.607936&type=pharmacy
+###
+
+
+### GET request to example server
+GET http://localhost:8080/api/nearest-place?lat=54.379194&lon=18.607936&type=restaurant
+###
