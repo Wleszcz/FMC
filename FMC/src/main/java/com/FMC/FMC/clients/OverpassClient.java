@@ -30,22 +30,26 @@ public class OverpassClient {
                 "[out:json];node[\"amenity\"=\"%s\"](around:4000,%f,%f);out 10;", type, lat, lon);
         String fullUrl = apiUrl + "?data=" + query;
 
-        return webClient.get()
-                .uri(fullUrl)
-                .retrieve()
-                .bodyToMono(Map.class)
-                .flatMap(response -> {
-                    List<Map<String, Object>> elements = (List<Map<String, Object>>) response.get("elements");
-                    if (elements == null || elements.isEmpty()) {
-                        return Mono.empty();
-                    }
-                    elements.sort(Comparator.comparingDouble(e -> {
-                        double eLat = ((Number) e.get("lat")).doubleValue();
-                        double eLon = ((Number) e.get("lon")).doubleValue();
-                        return jtsDistance(lat, lon, eLat, eLon);
-                    }));
-                    return Mono.just(elements.get(0));
-                });
+        try {
+            return webClient.get()
+                    .uri(fullUrl)
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .flatMap(response -> {
+                        List<Map<String, Object>> elements = (List<Map<String, Object>>) response.get("elements");
+                        if (elements == null || elements.isEmpty()) {
+                            return Mono.empty();
+                        }
+                        elements.sort(Comparator.comparingDouble(e -> {
+                            double eLat = ((Number) e.get("lat")).doubleValue();
+                            double eLon = ((Number) e.get("lon")).doubleValue();
+                            return jtsDistance(lat, lon, eLat, eLon);
+                        }));
+                        return Mono.just(elements.getFirst());
+                    });
+        } catch (Exception e) {
+            return Mono.error(e);
+        }
     }
 
     private double jtsDistance(double lat1, double lon1, double lat2, double lon2) {
