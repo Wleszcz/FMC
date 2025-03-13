@@ -7,13 +7,26 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  float: left;
-  margin-left: 10vw;
+  margin-left: 5vw;
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.main-container {
+  display: flex;
+  flex-direction: row;
+}
+
+h3 {
+  margin-top: 0px;
+  padding-top: 0px;
+}
+
+.location-info-box {
+  margin-left: 5vw;
+}
+
+li {
+  margin: 10px;
 }
