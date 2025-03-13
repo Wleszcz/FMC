@@ -1,5 +1,5 @@
 ### GET request to example server
-GET http://localhost:8080/api/nearest-place?lat=54.379194&lon=18.607936&type=hospital
+GET http://localhost:8080/api/nearest-place?lat=53.76944&lon=20.50092&type=veterinary
 ###
 
 ### GET request to example server

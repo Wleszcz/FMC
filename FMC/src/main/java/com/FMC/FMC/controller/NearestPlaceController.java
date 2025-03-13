@@ -3,6 +3,8 @@ package com.FMC.FMC.controller;
 import com.FMC.FMC.Amenity;
 import com.FMC.FMC.clients.OpenRouteServiceClient;
 import com.FMC.FMC.clients.OverpassClient;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,10 +25,12 @@ public class NearestPlaceController {
 
     private final OverpassClient overpassClient;
     private final OpenRouteServiceClient orsClient;
+    private final MessageSource messageSource;
 
-    public NearestPlaceController(OverpassClient overpassClient, OpenRouteServiceClient orsClient) {
+    public NearestPlaceController(OverpassClient overpassClient, OpenRouteServiceClient orsClient, MessageSource messageSource) {
         this.overpassClient = overpassClient;
         this.orsClient = orsClient;
+        this.messageSource = messageSource;
     }
 
     @GetMapping("/nearest-place")
@@ -52,10 +56,10 @@ public class NearestPlaceController {
     }
 
     @GetMapping("/get-amenity-list")
-    public Mono<List<Map<String, Object>>> getIndex(@RequestParam double lat, @RequestParam double lon) {
+    public Mono<List<Map<String, Object>>> getAmenityList(@RequestParam double lat, @RequestParam double lon) {
         return Flux.fromStream(Arrays.stream(Amenity.values()))
                 .flatMap(t -> overpassClient.findNearestPlace(lat, lon, t.name().toLowerCase())
-                        .retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(1)))
+                        .retryWhen(Retry.fixedDelay(5, Duration.ofSeconds(2)))
                         .flatMap(place -> {
                             double placeLat = (double) place.get("lat");
                             double placeLon = (double) place.get("lon");
@@ -63,12 +67,13 @@ public class NearestPlaceController {
                             return orsClient.getTravelTime(lat, lon, placeLat, placeLon)
                                     .map(travelData -> {
                                         Map<String, Object> response = new HashMap<>();
-                                        response.put("type", t.name().toLowerCase());
+                                        response.put("type", messageSource.getMessage("amenity." + t.name(), null, LocaleContextHolder.getLocale()));
                                         response.put("place", place);
                                         response.put("travel", extractTravelSummary(travelData));
                                         return response;
                                     });
-                        }))
+                        })
+                        .defaultIfEmpty(Map.of("type", messageSource.getMessage("amenity." + t.name(), null, LocaleContextHolder.getLocale()))))
                 .collectList();
     }
 
