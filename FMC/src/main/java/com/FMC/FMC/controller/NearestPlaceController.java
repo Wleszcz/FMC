@@ -67,7 +67,8 @@ public class NearestPlaceController {
                             return orsClient.getTravelTime(lat, lon, placeLat, placeLon)
                                     .map(travelData -> {
                                         Map<String, Object> response = new HashMap<>();
-                                        response.put("type", messageSource.getMessage("amenity." + t.name(), null, LocaleContextHolder.getLocale()));
+                                        response.put("displayType", messageSource.getMessage("amenity." + t.name(), null, LocaleContextHolder.getLocale()));
+                                        response.put("type", t.name().toLowerCase());
                                         response.put("place", place);
                                         response.put("travel", extractTravelSummary(travelData));
                                         return response;

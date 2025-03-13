@@ -48,7 +48,7 @@ const MapComponent = ({ markerPosition, setMarkerPosition, amenities, loading })
                 icon={getIcon(color)}
               >
                 <Popup>
-                  {point.place.tags?.name || point.type}
+                  {point.place.tags?.name || point.displayType}
                 </Popup>
               </Marker>
             );
@@ -71,19 +71,19 @@ const MapComponent = ({ markerPosition, setMarkerPosition, amenities, loading })
 
   const getMarkerColor = (type) => {
     switch(type) {
-      case "ATM":
+      case "atm":
         return "orange";
-      case "Hospital":
+      case "hospital":
         return "red";
-      case "School":
+      case "school":
         return "green";
-      case "Place of Worship":
+      case "place_of_worship":
         return "grey";
-      case "Library":
+      case "library":
         return "violet";
-      case "Cinema":
+      case "cinema":
         return "yellow";
-      case "Restaurant":
+      case "restaurant":
         return "black";
       default:
         return "blue";

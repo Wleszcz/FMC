@@ -14,14 +14,14 @@ const LocationInfo = ({ amenities, loading, error }) => {
       <h3>Udogodnienia w pobliżu ({foundAmenities.length}/{allAmenitiesNumber}):</h3><ul>
       {foundAmenities.map((item, i) => (
         <li key={i}>
-          <strong>{item.place.tags?.name || item.type}</strong> ({item.type})<br />
+          <strong>{item.place.tags?.name || item.displayType}</strong> ({item.displayType})<br />
           📌 {(item.travel.distance / 1000).toFixed(2)} km | ⏳ {Math.round(item.travel.duration / 60)} min.
         </li>
       ))}
     </ul><h3>Brakujące Udogodnienia:</h3><ul>
         {amenities.filter(item => !item.place || !item.travel).map((item, i) => (
           <li key={`missing-${i}`}>
-            <strong>{item.type}</strong>
+            <strong>{item.displayType}</strong>
           </li>
         ))}
       </ul>
