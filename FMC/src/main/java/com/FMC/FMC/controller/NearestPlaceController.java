@@ -74,7 +74,8 @@ public class NearestPlaceController {
                                         return response;
                                     });
                         })
-                        .defaultIfEmpty(Map.of("type", messageSource.getMessage("amenity." + t.name(), null, LocaleContextHolder.getLocale()))))
+                        .defaultIfEmpty(Map.of("displayType", messageSource.getMessage("amenity." + t.name(), null, LocaleContextHolder.getLocale()),
+                                "type", t.name().toLowerCase())))
                 .collectList();
     }
 
