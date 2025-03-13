@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -53,6 +55,7 @@ public class NearestPlaceController {
     public Mono<List<Map<String, Object>>> getIndex(@RequestParam double lat, @RequestParam double lon) {
         return Flux.fromStream(Arrays.stream(Amenity.values()))
                 .flatMap(t -> overpassClient.findNearestPlace(lat, lon, t.name().toLowerCase())
+                        .retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(1)))
                         .flatMap(place -> {
                             double placeLat = (double) place.get("lat");
                             double placeLon = (double) place.get("lon");
