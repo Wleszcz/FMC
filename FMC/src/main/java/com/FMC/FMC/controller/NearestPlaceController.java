@@ -3,6 +3,7 @@ package com.FMC.FMC.controller;
 import com.FMC.FMC.Place;
 import com.FMC.FMC.clients.OpenRouteServiceClient;
 import com.FMC.FMC.clients.OverpassClient;
+import com.FMC.FMC.heatMap.SavedPlace;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +19,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.FMC.FMC.utils.ControllerHelper.extractTravelSummary;
 
 @RestController
 @RequestMapping("/api")
@@ -41,10 +44,7 @@ public class NearestPlaceController {
 
         return overpassClient.findNearestPlace(lat, lon, Place.getPlaceFromName(type))
                 .flatMap(place -> {
-                    double placeLat = (double) place.get("lat");
-                    double placeLon = (double) place.get("lon");
-
-                    return orsClient.getTravelTime(lat, lon, placeLat, placeLon)
+                    return orsClient.getTravelTime(lat, lon, place.getLat(), place.getLon())
                             .map(travelData -> {
                                 Map<String, Object> response = new HashMap<>();
                                 response.put("place", place);
@@ -62,10 +62,7 @@ public class NearestPlaceController {
                         .delayElement(Duration.ofSeconds(1))
                         .retryWhen(Retry.fixedDelay(5, Duration.ofSeconds(2)))
                         .flatMap(place -> {
-                            double placeLat = (double) place.get("lat");
-                            double placeLon = (double) place.get("lon");
-
-                            return orsClient.getTravelTime(lat, lon, placeLat, placeLon)
+                            return orsClient.getTravelTime(lat, lon, place.getLat(), place.getLon())
                                     .map(travelData -> {
                                         Map<String, Object> response = new HashMap<>();
                                         response.put("displayType", messageSource.getMessage("amenity." + type.name(), null, LocaleContextHolder.getLocale()));
@@ -80,24 +77,13 @@ public class NearestPlaceController {
                 .collectList();
     }
 
-    private Map<String, Object> extractTravelSummary(Map<String, Object> travelData) {
-        Map<String, Object> travelSummary = new HashMap<>();
-        if (travelData != null) {
-            List<Map<String, Object>> features = (List<Map<String, Object>>) travelData.get("features");
-            if (features != null && !features.isEmpty()) {
-                Map<String, Object> firstFeature = features.get(0);
-                Map<String, Object> properties = (Map<String, Object>) firstFeature.get("properties");
-                if (properties != null) {
-                    List<Map<String, Object>> segments = (List<Map<String, Object>>) properties.get("segments");
-                    if (segments != null && !segments.isEmpty()) {
-                        // Pierwszy segment zawiera interesujące nas dane
-                        Map<String, Object> firstSegment = segments.get(0);
-                        travelSummary.put("distance", firstSegment.get("distance"));
-                        travelSummary.put("duration", firstSegment.get("duration"));
-                    }
-                }
-            }
-        }
-        return travelSummary;
+    @GetMapping("/all-places")
+    public  Mono<List<SavedPlace>> getAllPlaces(
+            @RequestParam double lat,
+            @RequestParam double lon,
+            @RequestParam String type,
+            @RequestParam Long radius) {
+
+        return overpassClient.findAllPlaces(lat, lon, Place.getPlaceFromName(type), radius);
     }
 }

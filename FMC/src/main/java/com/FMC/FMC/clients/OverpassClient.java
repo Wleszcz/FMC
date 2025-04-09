@@ -1,23 +1,29 @@
 package com.FMC.FMC.clients;
 
 import com.FMC.FMC.Place;
-import com.FMC.FMC.PlaceType;
+import com.FMC.FMC.heatMap.SavedPlace;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.operation.distance.DistanceOp;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.FMC.FMC.utils.ControllerHelper.mapToSavedPlace;
 
 @Service
 public class OverpassClient {
 
+    private static final Long DEFAULT_RADIUS = 4000L;
     @Value("${overpass.api.url}")
     String apiUrl;
 
@@ -27,42 +33,59 @@ public class OverpassClient {
         this.webClient = webClientBuilder.baseUrl(this.apiUrl).build();
     }
 
-    public Mono<Map<String, Object>> findNearestPlace(double lat, double lon, Place place) {
-        StringBuilder queryBuilder = new StringBuilder();
-        queryBuilder.append("[out:json];");
-        queryBuilder.append("node");
+    public Mono<List<Map<String, Object>>> fetchRawPlaces(double lat, double lon, Place place, Long radius) {
+        String key = place.getPlaceType().name().toLowerCase();
+        String value = place.name().toLowerCase();
 
-        queryBuilder.append("[\"")
-                .append(place.getPlaceType().name().toLowerCase())
-                .append("\"=\"")
-                .append(place.name().toLowerCase())
-                .append("\"]");
+        String query = String.format("""
+        [out:json];
+        (
+          node["%s"="%s"](around:%d,%.6f,%.6f);
+          way["%s"="%s"](around:%d,%.6f,%.6f);
+          relation["%s"="%s"](around:%d,%.6f,%.6f);
+        );
+        out center 50;
+        """,
+                key, value, radius, lat, lon,
+                key, value, radius, lat, lon,
+                key, value, radius, lat, lon
+        );
 
-        queryBuilder.append(String.format("(around:4000,%f,%f);", lat, lon));
-        queryBuilder.append("out 50;");
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("data", query);
 
-        String fullUrl = apiUrl + "?data=" + queryBuilder.toString();
+        return webClient.post()
+                .uri(apiUrl)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .bodyValue(formData)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .map(response -> (List<Map<String, Object>>) response.getOrDefault("elements", Collections.emptyList()));
+    }
 
-        try {
-            return webClient.get()
-                    .uri(fullUrl)
-                    .retrieve()
-                    .bodyToMono(Map.class)
-                    .flatMap(response -> {
-                        List<Map<String, Object>> elements = (List<Map<String, Object>>) response.get("elements");
-                        if (elements == null || elements.isEmpty()) {
-                            return Mono.empty();
-                        }
-                        elements.sort(Comparator.comparingDouble(e -> {
-                            double eLat = ((Number) e.get("lat")).doubleValue();
-                            double eLon = ((Number) e.get("lon")).doubleValue();
-                            return jtsDistance(lat, lon, eLat, eLon);
-                        }));
-                        return Mono.just(elements.getFirst());
-                    });
-        } catch (Exception e) {
-            return Mono.error(e);
-        }
+
+    public Mono<SavedPlace> findNearestPlace(double lat, double lon, Place place) {
+        return findAllPlaces(lat, lon, place, DEFAULT_RADIUS)
+                .flatMap(places -> {
+                    if (places.isEmpty()) {
+                        return Mono.empty();
+                    }
+
+                    places.sort(Comparator.comparingDouble(p ->
+                            jtsDistance(lat, lon, p.getLat(), p.getLon()))
+                    );
+
+                    return Mono.just(places.getFirst());
+                });
+    }
+
+    public Mono<List<SavedPlace>> findAllPlaces(double lat, double lon, Place place, Long radius) {
+        return fetchRawPlaces(lat, lon, place, radius)
+                .map(elements -> elements.stream()
+                        .map(e -> mapToSavedPlace(place, e))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList())
+                );
     }
 
     private double jtsDistance(double lat1, double lon1, double lat2, double lon2) {
