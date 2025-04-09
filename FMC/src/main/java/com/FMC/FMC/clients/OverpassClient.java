@@ -1,5 +1,7 @@
 package com.FMC.FMC.clients;
 
+import com.FMC.FMC.Place;
+import com.FMC.FMC.PlaceType;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -25,10 +27,21 @@ public class OverpassClient {
         this.webClient = webClientBuilder.baseUrl(this.apiUrl).build();
     }
 
-    public Mono<Map<String, Object>> findNearestPlace(double lat, double lon, String type) {
-        String query = String.format(
-                "[out:json];node[\"amenity\"=\"%s\"](around:4000,%f,%f);out 10;", type, lat, lon);
-        String fullUrl = apiUrl + "?data=" + query;
+    public Mono<Map<String, Object>> findNearestPlace(double lat, double lon, Place place) {
+        StringBuilder queryBuilder = new StringBuilder();
+        queryBuilder.append("[out:json];");
+        queryBuilder.append("node");
+
+        queryBuilder.append("[\"")
+                .append(place.getPlaceType().name().toLowerCase())
+                .append("\"=\"")
+                .append(place.name().toLowerCase())
+                .append("\"]");
+
+        queryBuilder.append(String.format("(around:4000,%f,%f);", lat, lon));
+        queryBuilder.append("out 50;");
+
+        String fullUrl = apiUrl + "?data=" + queryBuilder.toString();
 
         try {
             return webClient.get()

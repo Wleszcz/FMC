@@ -1,6 +1,6 @@
 package com.FMC.FMC.controller;
 
-import com.FMC.FMC.Amenity;
+import com.FMC.FMC.Place;
 import com.FMC.FMC.clients.OpenRouteServiceClient;
 import com.FMC.FMC.clients.OverpassClient;
 import org.springframework.context.MessageSource;
@@ -39,7 +39,7 @@ public class NearestPlaceController {
             @RequestParam double lon,
             @RequestParam String type) {
 
-        return overpassClient.findNearestPlace(lat, lon, type)
+        return overpassClient.findNearestPlace(lat, lon, Place.getPlaceFromName(type))
                 .flatMap(place -> {
                     double placeLat = (double) place.get("lat");
                     double placeLon = (double) place.get("lon");
@@ -57,8 +57,9 @@ public class NearestPlaceController {
 
     @GetMapping("/get-amenity-list")
     public Mono<List<Map<String, Object>>> getAmenityList(@RequestParam double lat, @RequestParam double lon) {
-        return Flux.fromStream(Arrays.stream(Amenity.values()))
-                .flatMap(t -> overpassClient.findNearestPlace(lat, lon, t.name().toLowerCase())
+        return Flux.fromStream(Arrays.stream(Place.values()))
+                .flatMap(type -> overpassClient.findNearestPlace(lat, lon, type)
+                        .delayElement(Duration.ofSeconds(1))
                         .retryWhen(Retry.fixedDelay(5, Duration.ofSeconds(2)))
                         .flatMap(place -> {
                             double placeLat = (double) place.get("lat");
@@ -67,15 +68,15 @@ public class NearestPlaceController {
                             return orsClient.getTravelTime(lat, lon, placeLat, placeLon)
                                     .map(travelData -> {
                                         Map<String, Object> response = new HashMap<>();
-                                        response.put("displayType", messageSource.getMessage("amenity." + t.name(), null, LocaleContextHolder.getLocale()));
-                                        response.put("type", t.name().toLowerCase());
+                                        response.put("displayType", messageSource.getMessage("amenity." + type.name(), null, LocaleContextHolder.getLocale()));
+                                        response.put("type", type.name().toLowerCase());
                                         response.put("place", place);
                                         response.put("travel", extractTravelSummary(travelData));
                                         return response;
                                     });
                         })
-                        .defaultIfEmpty(Map.of("displayType", messageSource.getMessage("amenity." + t.name(), null, LocaleContextHolder.getLocale()),
-                                "type", t.name().toLowerCase())))
+                        .defaultIfEmpty(Map.of("displayType", messageSource.getMessage("amenity." + type.name(), null, LocaleContextHolder.getLocale()),
+                                "type", type.name().toLowerCase())))
                 .collectList();
     }
 
