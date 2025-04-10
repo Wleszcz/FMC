@@ -19,7 +19,7 @@
   justify-content: center;
   gap: 4vw;
   flex-wrap: wrap;
-  margin-left: -20vw;
+  margin-left: -5 vw;
 }
 
 
@@ -27,6 +27,7 @@
   text-align: left;
   color: white;
   padding: 10px;
+  font-size: calc(6px + 2vmin);
 }
 
 h3, p {
