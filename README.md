@@ -69,7 +69,9 @@ Sample Visualizations:
 - Accessibility heatmaps
 - Detailed amenity listings
 - Travel times shown dynamically
-
+![Gdańsk heatMap](screenshots/screen1.png)
+![Gdańsk center heatMap](screenshots/screen2.png)
+![Amenities nearby](screenshots/screen3.png)
 ---
 
 ## 📌 Future Enhancements
