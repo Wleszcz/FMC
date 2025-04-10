@@ -38,7 +38,7 @@ function App() {
                 cursor: "pointer",
               }}
             >
-              🔍 Pobierz udogodnienia
+              🔍 Find amenities
             </button>
             <LocationInfo amenities={amenities} loading={loading} error={error} />
           </div>
