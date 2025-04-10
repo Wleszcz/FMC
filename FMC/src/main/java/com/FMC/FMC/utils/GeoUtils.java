@@ -20,7 +20,7 @@ public class GeoUtils {
     }
 
     public static double jtsDistanceInMeters(double lat1, double lon1, double lat2, double lon2) {
-        double earthRadius = 6371000; // promień Ziemi w metrach
+        double earthRadius = 6371000; // Promień Ziemi w metrach
 
         double dLat = Math.toRadians(lat2 - lat1);
         double dLon = Math.toRadians(lon2 - lon1);

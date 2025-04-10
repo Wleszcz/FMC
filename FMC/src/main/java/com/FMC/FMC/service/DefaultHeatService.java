@@ -6,7 +6,6 @@ import com.FMC.FMC.heatMap.Coord;
 import com.FMC.FMC.heatMap.FileRepository.PlaceStorage;
 import com.FMC.FMC.heatMap.HeatPoint;
 import com.FMC.FMC.heatMap.SavedPlace;
-import com.FMC.FMC.utils.ControllerHelper;
 import com.FMC.FMC.utils.GeoUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,8 +27,8 @@ public class DefaultHeatService implements HeatService {
     public static final double START_LON = 18.53531;
     public static final double END_LON = 18.67531;
 
-    private static final double LAT_STEP = 0.00019; // ~10m
-    private static final double LON_STEP = 0.00030; // ~10m
+    private static final double LAT_STEP = 0.00038; // ~20m
+    private static final double LON_STEP = 0.00060; // ~10m
 
 
     @Override

@@ -2,10 +2,6 @@ package com.FMC.FMC.clients;
 
 import com.FMC.FMC.Place;
 import com.FMC.FMC.heatMap.SavedPlace;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.operation.distance.DistanceOp;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -19,7 +15,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.FMC.FMC.utils.ControllerHelper.mapToSavedPlace;
-import static com.FMC.FMC.utils.GeoUtils.jtsDistance;
+import static com.FMC.FMC.utils.GeoUtils.jtsDistanceInMeters;
 
 @Service
 public class OverpassClient {
@@ -73,7 +69,7 @@ public class OverpassClient {
                     }
 
                     places.sort(Comparator.comparingDouble(p ->
-                            jtsDistance(lat, lon, p.getLat(), p.getLon()))
+                            jtsDistanceInMeters(lat, lon, p.getLat(), p.getLon()))
                     );
 
                     return Mono.just(places.getFirst());

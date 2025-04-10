@@ -50,7 +50,7 @@ const MapComponent = ({ markerPosition, setMarkerPosition, amenities, loading, l
                 icon={getIcon(color)}
               >
                 <Popup>
-                  {point.place.tags?.name || point.displayType}
+                  {point.place.name || point.displayType}
                 </Popup>
               </Marker>
             );
@@ -64,15 +64,15 @@ const MapComponent = ({ markerPosition, setMarkerPosition, amenities, loading, l
           longitudeExtractor={(m) => m.lon}
           latitudeExtractor={(m) => m.lat}
           intensityExtractor={(m) => m.value}
-          radius={35}             // większy zasięg rozmycia
-          blur={50}               // mocniejsze wygładzenie
+          radius={45}             // większy zasięg rozmycia
+          blur={70}               // mocniejsze wygładzenie
           max={100}
           gradient={{
             0.0: "blue",
             0.3: "cyan",
             0.6: "lime",
-            0.85: "yellow",
-            0.90: "orange",
+            0.7: "yellow",
+            0.8: "orange",
             0.95: "red"
           }}
         />
