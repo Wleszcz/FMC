@@ -14,7 +14,7 @@ const LocationInfo = ({ amenities, loading, error }) => {
       <h3>Udogodnienia w pobliżu ({foundAmenities.length}/{allAmenitiesNumber}):</h3><ul>
       {foundAmenities.map((item, i) => (
         <li key={i}>
-          <strong>{item.place.tags?.name || item.displayType}</strong> ({item.displayType})<br />
+          <strong>{item.place.name || item.displayType}</strong> ({item.displayType})<br />
           📌 {(item.travel.distance / 1000).toFixed(2)} km | ⏳ {Math.round(item.travel.duration / 60)} min.
         </li>
       ))}

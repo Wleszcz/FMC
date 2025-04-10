@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
+// src/hooks/useAmenities.js
+import { useState } from "react";
 
-export function useAmenities(lat, lon) {
+export function useAmenities() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
+  const fetchAmenities = (lat, lon) => {
     if (!lat || !lon) return;
     setLoading(true);
     setError(null);
@@ -26,7 +27,7 @@ export function useAmenities(lat, lon) {
         setError(err.message);
       })
       .finally(() => setLoading(false));
-  }, [lat, lon]);
+  };
 
-  return { data, loading, error };
+  return { data, loading, error, fetchAmenities };
 }

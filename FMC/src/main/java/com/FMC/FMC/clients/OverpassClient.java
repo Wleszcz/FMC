@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.FMC.FMC.utils.ControllerHelper.mapToSavedPlace;
+import static com.FMC.FMC.utils.GeoUtils.jtsDistance;
 
 @Service
 public class OverpassClient {
@@ -44,7 +45,7 @@ public class OverpassClient {
           way["%s"="%s"](around:%d,%.6f,%.6f);
           relation["%s"="%s"](around:%d,%.6f,%.6f);
         );
-        out center 50;
+        out center 100;
         """,
                 key, value, radius, lat, lon,
                 key, value, radius, lat, lon,
@@ -86,12 +87,5 @@ public class OverpassClient {
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList())
                 );
-    }
-
-    private double jtsDistance(double lat1, double lon1, double lat2, double lon2) {
-        GeometryFactory geometryFactory = new GeometryFactory();
-        Point point1 = geometryFactory.createPoint(new Coordinate(lon1, lat1));
-        Point point2 = geometryFactory.createPoint(new Coordinate(lon2, lat2));
-        return DistanceOp.distance(point1, point2);
     }
 }

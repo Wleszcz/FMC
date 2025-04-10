@@ -1,14 +1,13 @@
 package com.FMC.FMC.utils;
 
 import com.FMC.FMC.Place;
+import com.FMC.FMC.heatMap.Coord;
 import com.FMC.FMC.heatMap.SavedPlace;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class ControllerHelper {
+
     public static Map<String, Object> extractTravelSummary(Map<String, Object> travelData) {
         Map<String, Object> travelSummary = new HashMap<>();
         if (travelData != null) {
@@ -37,6 +36,9 @@ public class ControllerHelper {
         }
 
         double[] coords = coordOpt.get();
+        Number rawId = (Number) element.get("id");
+        Long id = rawId != null ? rawId.longValue() : null;
+
 
         String name = "Unknown";
         if (element.containsKey("tags")) {
@@ -49,12 +51,13 @@ public class ControllerHelper {
             }
         }
 
-        return new SavedPlace(
-                place,
-                coords[1], // lon
-                coords[0], // lat
-                name
-        );
+        return SavedPlace.builder()
+                .id(id)
+                .name(name)
+                .lat(coords[0])
+                .lon(coords[1])
+                .place(place)
+                .build();
     }
 
 
@@ -75,6 +78,16 @@ public class ControllerHelper {
         }
 
         return Optional.empty();
+    }
+
+    public static List<Coord> generateCoords(double startLat, double endLat, double startLon, double endLon, double latStep, double lonStep) {
+        List<Coord> coords = new ArrayList<>();
+        for (double lat = startLat; lat >= endLat; lat -= latStep ) {
+            for (double lon = startLon; lon <= endLon; lon += lonStep) {
+                coords.add(new Coord(lat, lon));
+            }
+        }
+        return coords;
     }
 
 }

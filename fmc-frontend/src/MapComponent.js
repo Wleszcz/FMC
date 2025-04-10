@@ -4,8 +4,10 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import { ICON_BASE_URL } from "./config";
+import { HeatmapLayer } from "react-leaflet-heatmap-layer-v3";
 
-const MapComponent = ({ markerPosition, setMarkerPosition, amenities, loading }) => {
+const MapComponent = ({ markerPosition, setMarkerPosition, amenities, loading, loadingHeatmap, heatmapData }) => {
+  
   const MapClickHandler = () => {
     useMapEvents({
       click(e) {
@@ -20,7 +22,7 @@ const MapComponent = ({ markerPosition, setMarkerPosition, amenities, loading })
       <MapContainer
         center={markerPosition}
         zoom={13}
-        style={{ height: "500px", width: "800px", marginTop: "30px" }}
+        style={{ height: "700px", width: "800px", marginTop: "10px" }}
       >
         <TileLayer
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
@@ -54,6 +56,27 @@ const MapComponent = ({ markerPosition, setMarkerPosition, amenities, loading })
             );
           })
         }
+        {!loadingHeatmap && heatmapData.length > 0 && (
+          <HeatmapLayer
+          fitBoundsOnLoad
+          fitBoundsOnUpdate
+          points={heatmapData}
+          longitudeExtractor={(m) => m.lon}
+          latitudeExtractor={(m) => m.lat}
+          intensityExtractor={(m) => m.value}
+          radius={35}             // większy zasięg rozmycia
+          blur={50}               // mocniejsze wygładzenie
+          max={100}
+          gradient={{
+            0.0: "blue",
+            0.3: "cyan",
+            0.6: "lime",
+            0.85: "yellow",
+            0.90: "orange",
+            0.95: "red"
+          }}
+        />
+        )}
 
         <MapClickHandler />
       </MapContainer>
