@@ -23,13 +23,12 @@ public class DefaultHeatService implements HeatService {
     private final PlaceStorage placeStorage;
 
     public static final double START_LAT = 54.42747;
-    public static final double END_LAT = 54.28747;
+    public static final double END_LAT = 54.34584;
     public static final double START_LON = 18.53531;
-    public static final double END_LON = 18.67531;
+    public static final double END_LON = 18.70863;
 
     private static final double LAT_STEP = 0.00038; // ~20m
-    private static final double LON_STEP = 0.00060; // ~10m
-
+    private static final double LON_STEP = 0.00038; // ~10m
 
     @Override
     public List<HeatPoint> calculateHeatPoints() {
