@@ -5,8 +5,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
+import java.time.Duration;
 import java.util.Map;
 
 @Service
@@ -31,6 +34,7 @@ public class OpenRouteServiceClient {
         return webClient.get()
                 .uri(requestUrl)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {});
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {}).retryWhen(Retry.backoff(3, Duration.ofSeconds(3))
+                        .filter(throwable -> throwable instanceof WebClientResponseException.TooManyRequests));
     }
 }

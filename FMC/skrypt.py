@@ -5,7 +5,7 @@ import rasterio
 from rasterio.transform import from_origin
 
 # Wczytaj JSON z listą punktów
-with open('heatmap.json', 'r') as f:
+with open('heatmap2.json', 'r') as f:
     data = json.load(f)
 
 # Zamień na DataFrame

@@ -9,7 +9,7 @@ import org.locationtech.jts.operation.distance.DistanceOp;
 import java.util.List;
 
 public class GeoUtils {
-    private static final double MAX_DISTANCE_M = 4000;
+    private static final double MAX_DISTANCE_M = 15 * 60;
 
 
     public static double jtsDistance(double lat1, double lon1, double lat2, double lon2) {
